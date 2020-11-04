@@ -1,11 +1,14 @@
 package me.study.demoinflearnrestapi.events;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.hamcrest.Matchers;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpHeaders;
@@ -20,10 +23,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
- *   웹에 관련된 슬라이싱 테스트
+ *   애플리케이션과 가장 가까운 API 테스트방식은 Spring Boot Test 방식으로 진행하는 것이 편함.
  * */
 @RunWith(SpringRunner.class)
-@WebMvcTest // 웹과 관련된 Bean이 등록됨 (Repository는 등록하지 않으므로 MockBean을 등록해서 해야 에러가 안남)
+//@WebMvcTest // 웹과 관련된 Bean이 등록됨 (Repository는 등록하지 않으므로 MockBean을 등록해서 해야 에러가 안남)
+@SpringBootTest // SpringBoot 테스트가 더 편하다. Mocking 할게 적고 편함
+@AutoConfigureMockMvc // 슬라이싱테스트가 아닐때 MockMvc를 사용하기 위한 설정 -> 실제로 Repositry를 사용해서 테스트를 동작시킴
 public class EventControllerTests {
 
     /**
@@ -37,12 +42,15 @@ public class EventControllerTests {
     @Autowired
     ObjectMapper objectMapper;
 
+/*
     @MockBean
     EventRepository eventRepository;
+*/
 
     @Test
     public void createEvent() throws Exception {
         Event event = Event.builder()
+                .id(100)
                 .name("Spring")
                 .description("Rest API Study")
                 .beginEnrollmentDateTime(LocalDateTime.of(2020,11,3,20,11))
@@ -53,11 +61,13 @@ public class EventControllerTests {
                 .maxPrice(200)
                 .limitOfEnrollment(100)
                 .location("강남역 D2 스타텁 팩토리")
+                .free(true)
+                .offline(false)
+                .eventStatus(EventStatus.PUBLISHED)
                 .build();
         
-        //event로 save를 요청하면 event를 Return 해라
-        event.setId(10);
-        Mockito.when(eventRepository.save(event)).thenReturn(event);
+        //event로 save를 요청하면 event를 Return 해라 (mocking)
+        //Mockito.when(eventRepository.save(event)).thenReturn(event);
 
         mockMvc.perform(post("/api/events")
                     .contentType(MediaType.APPLICATION_JSON)
@@ -68,6 +78,9 @@ public class EventControllerTests {
                 .andExpect(jsonPath("id").exists())
                 .andExpect(header().exists(HttpHeaders.LOCATION))
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaTypes.HAL_JSON_VALUE))
+                .andExpect(jsonPath("id").value(Matchers.not(100)))
+                .andExpect(jsonPath("free").value(Matchers.not(true)))
+                .andExpect(jsonPath("eventStatus").value(EventStatus.DRAFT.name()))
         ;
     }
 }

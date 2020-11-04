@@ -1,20 +1,14 @@
 package me.study.demoinflearnrestapi.events;
 
+// Event에 너무 Annotation이 많아서 DTO로 분산처리
+// 입력을 받을 때만 사용, 단점 : 중복
 import lombok.*;
 
-import javax.persistence.*;
 import java.time.LocalDateTime;
+@Builder @NoArgsConstructor @AllArgsConstructor
+@Data
+public class EventDto {
 
-@Getter
-@Setter
-@EqualsAndHashCode(of = "id")
-@Builder
-@NoArgsConstructor @AllArgsConstructor
-@Entity
-public class Event {
-
-    @Id @GeneratedValue
-    private Integer id;
     private String name;
     private String description;
     private LocalDateTime beginEnrollmentDateTime;
@@ -25,9 +19,4 @@ public class Event {
     private int basePrice; // (optional)
     private int maxPrice; // (optional)
     private int limitOfEnrollment;
-    private boolean offline;
-    private boolean free;
-    @Enumerated(EnumType.STRING)
-    private EventStatus eventStatus = EventStatus.DRAFT; // 기본설정 DRAFT
-
 }
