@@ -43,6 +43,7 @@ public class EventController {
         }
 
         Event event = modelMapper.map(eventDto, Event.class);
+        event.update();
         Event newEvent = this.eventRepository.save(event);
         URI createdUri = linkTo(EventController.class).slash(newEvent.getId()).toUri();
         // event는 자바Bean 스펙을 준수하고 있어서 Json으로 Serialization을 하기 때문에 Json으로 자동으로 전송
