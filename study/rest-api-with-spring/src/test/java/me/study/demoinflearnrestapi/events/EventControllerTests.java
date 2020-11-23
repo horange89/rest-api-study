@@ -211,7 +211,7 @@ public class EventControllerTests {
         //Given
         IntStream.range(0, 30).forEach(this::generatedEvent);
 
-        // When -> Page는 0번부터 시작함
+        // When&Then -> Page는 0번부터 시작함
         this.mockMvc.perform(get("/api/events")
                         .param("page", "1")
                         .param("size", "10")
@@ -227,13 +227,38 @@ public class EventControllerTests {
         ;
    }
 
+   @Test
+   @TestDescription("기존의 이벤트를 하나 조회하기")
+   public void getEvent() throws Exception {
+        //Given
+       Event event = this.generatedEvent(100);
+
+       // When & Then
+       this.mockMvc.perform(get("/api/events/{id}", event.getId()))
+               .andExpect(status().isOk())
+               .andExpect(jsonPath("name").exists())
+               .andExpect(jsonPath("id").exists())
+               .andExpect(jsonPath("_links.self").exists())
+               .andExpect(jsonPath("_links.profile").exists())
+               .andDo(document("get-an-event"))
+       ;
+   }
+
+   @Test
+   @TestDescription("없는 이번트를 조회했을 때 404 응답 받기")
+   public void getEvent404() throws Exception {
+    // When & Then
+        this.mockMvc.perform(get("/api/events/11883"))
+            .andExpect(status().isNotFound())
+    ;
+}
     // 이벤트 저장하는 로직
-    private void generatedEvent(int index) {
+    private Event generatedEvent(int index) {
         Event event = Event.builder()
                 .name("event " + index)
                 .description("test event")
                 .build();
 
-        this.eventRepository.save(event);
+        return this.eventRepository.save(event);
     }
 }
