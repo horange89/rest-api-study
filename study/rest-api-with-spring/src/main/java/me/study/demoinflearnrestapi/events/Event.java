@@ -1,6 +1,7 @@
 package me.study.demoinflearnrestapi.events;
 
 import lombok.*;
+import me.study.demoinflearnrestapi.accounts.Account;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -29,6 +30,10 @@ public class Event {
     private boolean free;
     @Enumerated(EnumType.STRING)
     private EventStatus eventStatus = EventStatus.DRAFT; // 기본설정 DRAFT
+
+    // 단방향 참조
+    @ManyToOne
+    private Account manager;
 
     public void update() {
         // Update Free

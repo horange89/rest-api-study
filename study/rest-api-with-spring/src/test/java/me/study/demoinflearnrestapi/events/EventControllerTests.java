@@ -1,6 +1,7 @@
 package me.study.demoinflearnrestapi.events;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import me.study.demoinflearnrestapi.common.BaseControllerTest;
 import me.study.demoinflearnrestapi.common.RestDocsConfiguration;
 import me.study.demoinflearnrestapi.common.TestDescription;
 import org.junit.Test;
@@ -35,22 +36,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  *   애플리케이션과 가장 가까운 API 테스트방식은 Spring Boot Test 방식으로 진행하는 것이 편함.
  * */
-@RunWith(SpringRunner.class)
-@SpringBootTest // SpringBoot 테스트가 더 편하다. Mocking 할게 적고 편함
-@AutoConfigureMockMvc // 슬라이싱테스트가 아닐때 MockMvc를 사용하기 위한 설정 -> 실제로 Repositry를 사용해서 테스트를 동작시킴
-@AutoConfigureRestDocs // RestDocs 사용하기 위한 애노테이션
-@Import(RestDocsConfiguration.class) // Rest Docs Customizing (Pretty Printing Process)
-@ActiveProfiles("test")
-public class EventControllerTests {
+
+public class EventControllerTests extends BaseControllerTest {
 
     /**
      *  Mocking 되어 있는 Dispatcher Servlet을 상대로
      *  가짜 요청을 Dispatcher Servlet 보내고
      *  응답을 확인할 수 있는 기능
      * */
-    @Autowired
-    MockMvc mockMvc;
-
     @Autowired
     ObjectMapper objectMapper;
 
@@ -277,6 +270,7 @@ public class EventControllerTests {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("name").value(eventName))
                 .andExpect(jsonPath("_links.self").exists())
+                .andDo(document("update-event"))
         ;
     }
 
